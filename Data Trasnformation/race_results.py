@@ -87,4 +87,20 @@ final_df.write.mode("overwrite").parquet("dbfs:/FileStore/tables/presentation/ra
 
 # COMMAND ----------
 
+# MAGIC %sql
+
+# COMMAND ----------
+
+# MAGIC %sql
+# MAGIC create table race_results
+# MAGIC as
+# MAGIC select * from PARQUET.`dbfs:/FileStore/tables/presentation/race_results`
+
+# COMMAND ----------
+
+# MAGIC %sql
+# MAGIC select * from race_results
+
+# COMMAND ----------
+
 

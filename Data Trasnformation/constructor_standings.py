@@ -15,12 +15,12 @@ from pyspark.sql.functions import *
 
 # COMMAND ----------
 
-driver_standings_df = race_results_df.groupBy("race_year","driver_name","driver_nationality","team") \
+constructor_standings_df = race_results_df.groupBy("race_year","team") \
                                      .agg(sum("points").alias("total_points"),count(when(col("position") == 1 , True)).alias("wins"))
 
 # COMMAND ----------
 
-display(driver_standings_df.filter("race_year = 2020"))
+display(constructor_standings_df.filter("race_year = 2020"))
 
 # COMMAND ----------
 
@@ -29,8 +29,8 @@ from pyspark.sql.functions import desc,rank
 
 # COMMAND ----------
 
-driver_rank_spec = Window.partitionBy("race_year").orderBy(desc("total_points") , desc("wins"))
-final_df = driver_standings_df.withColumn("rank" , rank().over(driver_rank_spec))
+constructor_rank_spec = Window.partitionBy("race_year").orderBy(desc("total_points") , desc("wins"))
+final_df = constructor_standings_df.withColumn("rank" , rank().over(constructor_rank_spec))
 
 # COMMAND ----------
 
@@ -38,14 +38,19 @@ display(final_df.filter("race_year = 2020"))
 
 # COMMAND ----------
 
-final_df.write.parquet(f"{presentation_folder_path}/driver_standings")
+final_df.write.parquet(f"{presentation_folder_path}/constructor_standings")
+
+# COMMAND ----------
+
+# MAGIC %fs
+# MAGIC ls "dbfs:/FileStore/tables/presentation/race_results/"
 
 # COMMAND ----------
 
 # MAGIC %sql
-# MAGIC create table driver_standings
+# MAGIC create table constructor_standings
 # MAGIC as
-# MAGIC select * from PARQUET.`dbfs:/FileStore/tables/presentation/driver_standings`
+# MAGIC select * from PARQUET.`dbfs:/FileStore/tables/presentation/constructor_standings`
 
 # COMMAND ----------
 
