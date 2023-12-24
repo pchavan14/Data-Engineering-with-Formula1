@@ -27,7 +27,7 @@ csv_df = spark.read \
     .option("header","true") \
     .csv("Data/f1db_csv/circuits.csv")
 
-csv_df.show(5,truncate=False)
+#csv_df.show(5,truncate=False)
 
 #get the schema
 csv_df.printSchema()
@@ -35,24 +35,44 @@ csv_df.printSchema()
 #Select only required columns from data
 csv_selected = csv_df.select(col("circuitId"),col("country").alias("race_country"),col("lat"), col("lng"))
 
-csv_selected.show(truncate=False)
+#csv_selected.show(truncate=False)
 
 #renaming the column (can be done with .alias() function as well)
 csv_renamed = csv_selected.withColumnRenamed("circuitId","circuit_id") \
                           .withColumnRenamed("lat","latitude")
 
-csv_renamed.show(5,truncate=False)
+#csv_renamed.show(5,truncate=False)
 
 #adding new column withColumn() function 
 csv_final = csv_renamed.withColumn("ingestion_time",current_timestamp())
 
-csv_final.show(5,truncate=False)
+#csv_final.show(5,truncate=False)
 
 #to add a literal value as a new column 
 
 csv_final_2 = csv_final.withColumn("env",lit("production"))
 
-csv_final_2.show(5,truncate=False)
+#csv_final_2.show(5,truncate=False)
+
+#cast function to update the datatype of a column
+csv_final_3 = csv_final_2.withColumn("new_latitude",col("latitude").cast("Double"))
+
+#csv_final_3.show(5)
+csv_final_3.printSchema()
+
+#Dataframe writer
+
+csv_final_2.write.mode("overwrite").parquet("Data/parquet_files")
+
+
+races_csv = spark.read.option("header","true").csv("Data/f1db_csv/races.csv")
+
+races_csv.show(5,truncate=False)
+
+races_csv.printSchema()
+
+#partition the data and create folders
+races_csv.write.mode("overwrite").partitionBy("year").parquet("Data/parquet_files/races")
 
 
 
